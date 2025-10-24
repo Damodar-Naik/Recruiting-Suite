@@ -6,12 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:create": "npx sequelize-cli db:create",
+    "db:drop": "npx sequelize-cli db:drop"
   },
   "dependencies": {
-    "@affinda/affinda": "^7.7.0",
-    "@google/genai": "^1.27.0",
-    "better-sqlite3": "^12.4.1",
     "next": "16.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
@@ -22,8 +24,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sequelize": "^4.28.20",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
+    "sequelize-cli": "^6.6.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

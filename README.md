@@ -1,10 +1,11 @@
 This is a mockup for a Recruitment Suite
 
 Stack :
-- Nextjs, for frontend and backend.
+- Nextjs, for frontend.
+- NodeJs & express, for backend.
 - Gemini, for LLM.
 - AFFINDA, for Resume Parsing.
-- better-sqlite3, for local DB.
+- postgres, for DB.
 
 ---------------------------------------------------------------------------
 steps to setup the project loacally:
@@ -14,8 +15,5 @@ steps to setup the project loacally:
 - npm run dev
 
 env variables :
-- AFFINDA_API_KEY
-- AFFINDA_WORKSPACE_ID
-- GEMINI_API_KEY
-- GEMINI_MODEL
+- NEXT_PUBLIC_BACKEND_URL
 

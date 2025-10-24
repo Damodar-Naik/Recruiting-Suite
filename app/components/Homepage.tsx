@@ -53,7 +53,7 @@ export default function Homepage() {
         formData.append("jobRole", selectedRole);
 
         try {
-            const response = await fetch("/api/parse-resume", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resume/parse`, {
                 method: "POST",
                 body: formData,
             });

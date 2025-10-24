@@ -50,7 +50,7 @@ export default function HRDashboard() {
     const fetchCandidates = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/candidates?role=${selectedRole}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/candidates?role=${selectedRole}`);
             const data = await response.json();
             setCandidates(data.candidates);
         } catch (error) {
@@ -62,14 +62,13 @@ export default function HRDashboard() {
 
     const updateCandidateStage = async (candidateId: number, newStage: string) => {
         try {
-            const response = await fetch('/api/candidates', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/candidates/${candidateId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: candidateId, onboardingStage: newStage })
+                body: JSON.stringify({ onboardingStage: newStage })
             });
 
             if (response.ok) {
-                // Update local state
                 setCandidates(prev =>
                     prev.map(c => c.id === candidateId ? { ...c, onboardingStage: newStage } : c)
                 );
