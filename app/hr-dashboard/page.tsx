@@ -36,6 +36,9 @@ const roleOptions = [
 ];
 
 export default function HRDashboard() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
+    const [authError, setAuthError] = useState('');
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [selectedRole, setSelectedRole] = useState('all');
     const [loading, setLoading] = useState(true);
@@ -44,8 +47,25 @@ export default function HRDashboard() {
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchCandidates();
-    }, [selectedRole]);
+        if (isAuthenticated) {
+            fetchCandidates();
+        }
+    }, [selectedRole, isAuthenticated]);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // You can replace this with an API call to verify the password
+        const HR_PASSWORD = process.env.NEXT_PUBLIC_HR_PASSWORD || 'admin123';
+
+        if (password === HR_PASSWORD) {
+            setIsAuthenticated(true);
+            setAuthError('');
+        } else {
+            setAuthError('Invalid password. Please try again.');
+            setPassword('');
+        }
+    };
 
     const fetchCandidates = async () => {
         setLoading(true);
@@ -137,6 +157,69 @@ export default function HRDashboard() {
     };
 
     const stats = getStats();
+
+    // Login Screen
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+                <div className="max-w-md w-full">
+                    <div className="rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                        {/* Header */}
+                        <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center">
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-2xl mb-4">
+                                <Users className="w-10 h-10 text-white" />
+                            </div>
+                            <h1 className="text-3xl font-bold text-white mb-2">HR Dashboard</h1>
+                            <p className="text-blue-100">Secure Access Portal</p>
+                        </div>
+
+                        {/* Login Form */}
+                        <form onSubmit={handleLogin} className="p-8">
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setAuthError('');
+                                    }}
+                                    placeholder="Enter your password"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    autoFocus
+                                />
+                            </div>
+
+                            {authError && (
+                                <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                                    <p className="text-sm text-red-700 flex items-center gap-2">
+                                        <span className="text-red-500">⚠️</span>
+                                        {authError}
+                                    </p>
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                className="w-full px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+                                disabled={!password}
+                            >
+                                Access Dashboard
+                            </button>
+
+                            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                                <p className="text-xs text-gray-600 text-center">
+                                    🔒 This is a secure area. Only authorized HR personnel can access this dashboard.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -237,8 +320,8 @@ export default function HRDashboard() {
                                 <div
                                     key={stage.id}
                                     className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${isDragOver
-                                        ? 'border-indigo-400 bg-indigo-50 scale-105'
-                                        : 'border-gray-100'
+                                            ? 'border-indigo-400 bg-indigo-50 scale-105'
+                                            : 'border-gray-100'
                                         }`}
                                     onDragOver={(e) => handleDragOver(e, stage.id)}
                                     onDragLeave={handleDragLeave}
@@ -315,10 +398,10 @@ export default function HRDashboard() {
 
                 {/* Candidate Detail Modal */}
                 {selectedCandidate && (
-                    <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+                    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
                         <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
                             {/* Modal Header */}
-                            <div className="sticky top-0 bg-linear-to-br from-blue-600 to-indigo-600 px-8 py-6 flex items-center justify-between">
+                            <div className="sticky top-0 bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-6 flex items-center justify-between">
                                 <div>
                                     <h2 className="text-2xl font-bold text-white">
                                         {selectedCandidate.firstName} {selectedCandidate.familyName}
@@ -330,7 +413,7 @@ export default function HRDashboard() {
                                 </div>
                                 <button
                                     onClick={() => setSelectedCandidate(null)}
-                                    className="w-10 h-10 bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all"
+                                    className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all"
                                 >
                                     <X className="w-6 h-6 text-white" />
                                 </button>
@@ -492,9 +575,9 @@ export default function HRDashboard() {
                                         <h3 className="font-bold text-gray-900 mb-4">Skills & Technologies</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedCandidate.rawData.skill.map((skill: any, i: number) => (
-                                                skill?.name.trim() && <span
+                                                skill?.name?.trim() && <span
                                                     key={i}
-                                                    className="px-4 py-2 bg-linear-to-br from-blue-50 to-indigo-50 text-indigo-700 rounded-lg text-sm font-medium border border-indigo-100 hover:border-indigo-300 transition-colors"
+                                                    className="px-4 py-2 bg-linear-to-r from-blue-50 to-indigo-50 text-indigo-700 rounded-lg text-sm font-medium border border-indigo-100 hover:border-indigo-300 transition-colors"
                                                 >
                                                     {skill.name}
                                                 </span>
