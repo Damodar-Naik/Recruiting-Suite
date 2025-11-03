@@ -1,7 +1,7 @@
-// FILE: app\components\Homepage.tsx
 'use client';
 
 import { useState } from "react";
+import { Upload, Briefcase, CheckCircle, AlertCircle, Sparkles, FileText, Send } from "lucide-react";
 
 export default function Homepage() {
     const [file, setFile] = useState<File | null>(null);
@@ -9,14 +9,16 @@ export default function Homepage() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState<string>("");
+    const [dragActive, setDragActive] = useState(false);
+    const [submittedRole, setSubmittedRole] = useState<string>("");
 
     const jobRoles = [
-        { value: "", label: "Select a role" },
-        { value: "frontend", label: "Frontend Engineer" },
-        { value: "backend", label: "Backend Engineer" },
-        { value: "fullstack", label: "Fullstack Engineer" },
-        { value: "devops", label: "DevOps Engineer" },
-        { value: "ai_engineer", label: "AI Engineer" }
+        { value: "", label: "Select a role", icon: "💼" },
+        { value: "frontend", label: "Frontend Engineer", icon: "🎨" },
+        { value: "backend", label: "Backend Engineer", icon: "⚙️" },
+        { value: "fullstack", label: "Fullstack Engineer", icon: "🚀" },
+        { value: "devops", label: "DevOps Engineer", icon: "☁️" },
+        { value: "ai_engineer", label: "AI Engineer", icon: "🤖" }
     ];
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,6 +26,33 @@ export default function Homepage() {
             setFile(e.target.files[0]);
             setError("");
             setSuccess(false);
+        }
+    };
+
+    const handleDrag = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile.type === "application/pdf") {
+                setFile(droppedFile);
+                setError("");
+                setSuccess(false);
+            } else {
+                setError("Please upload a PDF file");
+            }
         }
     };
 
@@ -64,13 +93,12 @@ export default function Homepage() {
                 throw new Error(data.error || "Failed to process your application");
             }
 
-            // Show success message
+            // Save the role before resetting
+            setSubmittedRole(selectedRole);
             setSuccess(true);
-            // Reset form
             setFile(null);
             setSelectedRole("");
 
-            // Reset file input
             const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
             if (fileInput) {
                 fileInput.value = '';
@@ -83,130 +111,219 @@ export default function Homepage() {
         }
     };
 
-    const getRoleLabel = () => {
-        return jobRoles.find(role => role.value === selectedRole)?.label || selectedRole;
+    const getRoleLabel = (roleValue?: string) => {
+        const value = roleValue || submittedRole;
+        return jobRoles.find(role => role.value === value)?.label || value;
     };
 
     return (
-        <div className="max-w-2xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-2">Job Application</h1>
-            <p className="text-gray-600 mb-6">Submit your resume for evaluation</p>
-
-            <div className="space-y-6">
-                {/* Success Message */}
-                {success && (
-                    <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center">
-                            <div className="shrink-0">
-                                <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <h3 className="text-lg font-medium text-green-800">
-                                    Thank You for Your Application!
-                                </h3>
-                                <div className="mt-2 text-green-700">
-                                    <p>
-                                        Thank you for applying for the <strong>{getRoleLabel()}</strong> position.
-                                        Your resume has been received and will be evaluated by our team.
-                                    </p>
-                                    <p className="mt-2">
-                                        We will review your application and update you accordingly via email.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
+            <div className="max-w-4xl mx-auto px-6 py-12">
+                {/* Header */}
+                <div className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
+                        <Briefcase className="w-8 h-8 text-white" />
                     </div>
-                )}
+                    <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text">
+                        Join Our Team
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                        Start your journey with us by submitting your application
+                    </p>
+                </div>
 
-                {/* Application Form - Only show when not successful */}
-                {!success && (
-                    <>
-                        {/* Role Selection - Required */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Position you are applying for <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                value={selectedRole}
-                                onChange={handleRoleChange}
-                                required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                {/* Main Card */}
+                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                    {success ? (
+                        /* Success State */
+                        <div className="p-12 text-center">
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6 animate-bounce">
+                                <CheckCircle className="w-10 h-10 text-green-600" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                                Application Received!
+                            </h2>
+                            <p className="text-lg text-gray-600 mb-2">
+                                Thank you for applying for the <span className="font-semibold text-indigo-600">{getRoleLabel()}</span> position.
+                            </p>
+                            <p className="text-gray-600 mb-8">
+                                Your resume has been received and will be evaluated by our team. We'll get back to you via email soon.
+                            </p>
+                            <button
+                                onClick={() => setSuccess(false)}
+                                className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                             >
-                                {jobRoles.map((role) => (
-                                    <option key={role.value} value={role.value}>
-                                        {role.label}
-                                    </option>
-                                ))}
-                            </select>
+                                Submit Another Application
+                            </button>
                         </div>
-
-                        {/* File Upload - Required */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Upload your resume <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="file"
-                                accept=".pdf"
-                                onChange={handleFileChange}
-                                className="block w-full text-sm text-gray-500
-                                    file:mr-4 file:py-2 file:px-4
-                                    file:rounded-md file:border-0
-                                    file:text-sm file:font-semibold
-                                    file:bg-blue-50 file:text-blue-700
-                                    hover:file:bg-blue-100"
-                            />
-                        </div>
-
-                        {/* Upload Button */}
-                        <button
-                            onClick={handleUpload}
-                            disabled={!file || !selectedRole || loading}
-                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-md
-                                disabled:bg-gray-300 disabled:cursor-not-allowed
-                                hover:bg-blue-700 transition-colors duration-200
-                                font-medium text-base"
-                        >
-                            {loading ? (
-                                <div className="flex items-center justify-center">
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Processing your application...
+                    ) : (
+                        /* Application Form */
+                        <div className="p-8 md:p-12">
+                            <div className="space-y-8">
+                                {/* Role Selection */}
+                                <div>
+                                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                        <Sparkles className="w-4 h-4 mr-2 text-indigo-600" />
+                                        Select Your Role
+                                        <span className="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedRole}
+                                            onChange={handleRoleChange}
+                                            className="w-full px-4 py-4 pr-10 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-gray-900 font-medium cursor-pointer hover:border-indigo-300"
+                                        >
+                                            {jobRoles.map((role) => (
+                                                <option key={role.value} value={role.value}>
+                                                    {role.icon} {role.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
-                            ) : (
-                                "Submit Application"
-                            )}
-                        </button>
 
-                        {/* Error Display */}
-                        {error && (
-                            <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-200">
-                                <div className="flex items-center">
-                                    <svg className="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="font-medium">Error</span>
+                                {/* File Upload */}
+                                <div>
+                                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                                        <FileText className="w-4 h-4 mr-2 text-indigo-600" />
+                                        Upload Your Resume
+                                        <span className="text-red-500 ml-1">*</span>
+                                    </label>
+
+                                    <div
+                                        onDragEnter={handleDrag}
+                                        onDragLeave={handleDrag}
+                                        onDragOver={handleDrag}
+                                        onDrop={handleDrop}
+                                        className={`relative border-3 border-dashed rounded-2xl transition-all duration-300 ${dragActive
+                                            ? 'border-indigo-500 bg-indigo-50'
+                                            : file
+                                                ? 'border-green-400 bg-green-50'
+                                                : 'border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50'
+                                            }`}
+                                    >
+                                        <input
+                                            type="file"
+                                            accept=".pdf"
+                                            onChange={handleFileChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        />
+
+                                        <div className="p-12 text-center">
+                                            {file ? (
+                                                <div className="space-y-4">
+                                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
+                                                        <CheckCircle className="w-8 h-8 text-green-600" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-lg font-semibold text-gray-900">{file.name}</p>
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setFile(null);
+                                                            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                                                            if (fileInput) fileInput.value = '';
+                                                        }}
+                                                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    >
+                                                        Change file
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full">
+                                                        <Upload className="w-8 h-8 text-indigo-600" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-lg font-semibold text-gray-900">
+                                                            Drop your resume here
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            or click to browse (PDF only)
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                                <p className="mt-1">{error}</p>
+
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="flex items-start p-4 bg-red-50 border-l-4 border-red-500 rounded-lg animate-pulse">
+                                        <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 shrink-0" />
+                                        <div>
+                                            <p className="font-semibold text-red-800">Error</p>
+                                            <p className="text-sm text-red-700 mt-1">{error}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Submit Button */}
+                                <button
+                                    onClick={handleUpload}
+                                    disabled={!file || !selectedRole || loading}
+                                    className="w-full px-6 py-5 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg
+                                        disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed
+                                        hover:from-blue-700 hover:to-indigo-700 transition-all duration-200
+                                        shadow-lg hover:shadow-xl disabled:shadow-none
+                                        flex items-center justify-center group relative overflow-hidden"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Processing Application...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform" />
+                                            Submit Application
+                                        </>
+                                    )}
+                                </button>
+
+                                {/* Info Box */}
+                                <div className="p-6 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                        <Sparkles className="w-5 h-5 mr-2 text-indigo-600" />
+                                        What happens next?
+                                    </h3>
+                                    <ul className="space-y-2 text-sm text-gray-700">
+                                        <li className="flex items-start">
+                                            <span className="inline-block w-1.5 h-1.5 bg-indigo-600 rounded-full mt-2 mr-3 shrink-0"></span>
+                                            <span>Our AI system will analyze your resume and qualifications</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="inline-block w-1.5 h-1.5 bg-indigo-600 rounded-full mt-2 mr-3 shrink-0"></span>
+                                            <span>Our HR team will review the evaluation results</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="inline-block w-1.5 h-1.5 bg-indigo-600 rounded-full mt-2 mr-3 shrink-0"></span>
+                                            <span>You'll receive an update within 3-5 business days</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        )}
-                    </>
-                )}
+                        </div>
+                    )}
+                </div>
 
-                {/* Additional Info */}
-                {!success && (
-                    <div className="p-4 bg-blue-50 rounded-md border border-blue-200">
-                        <h3 className="font-semibold text-blue-800 mb-2">What happens next?</h3>
-                        <ul className="text-sm text-blue-700 space-y-1">
-                            <li>• Our AI system will analyze your resume and qualifications</li>
-                            <li>• Our HR team will review the evaluation results</li>
-                        </ul>
-                    </div>
-                )}
+                {/* Footer */}
+                <p className="text-center text-sm text-gray-500 mt-8">
+                    By submitting your application, you agree to our Terms of Service and Privacy Policy
+                </p>
             </div>
         </div>
     );
