@@ -52,25 +52,38 @@ export default function HRDashboard() {
         }
     }, [selectedRole, isAuthenticated]);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // You can replace this with an API call to verify the password
-        const HR_PASSWORD = process.env.NEXT_PUBLIC_HR_PASSWORD || 'admin123';
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hr/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
 
-        if (password === HR_PASSWORD) {
-            setIsAuthenticated(true);
-            setAuthError('');
-        } else {
-            setAuthError('Invalid password. Please try again.');
-            setPassword('');
+            const data = await response.json();
+
+            if (response.ok) {
+                // Store auth token (not password!)
+                localStorage.setItem('hrAuthToken', data.token);
+                setIsAuthenticated(true);
+                setAuthError('');
+            } else {
+                setAuthError('Invalid password');
+            }
+        } catch (error) {
+            setAuthError('Authentication failed');
         }
     };
 
     const fetchCandidates = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/candidates?role=${selectedRole}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hr/candidates?role=${selectedRole}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' , authorization: `Bearer ${localStorage.getItem('hrAuthToken')}` },
+            });
             const data = await response.json();
             setCandidates(data.candidates);
         } catch (error) {
@@ -82,7 +95,7 @@ export default function HRDashboard() {
 
     const updateCandidateStage = async (candidateId: number, newStage: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/candidates/${candidateId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hr/${candidateId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ onboardingStage: newStage })
@@ -147,12 +160,13 @@ export default function HRDashboard() {
     };
 
     const getStats = () => {
+        const numberOfcandidates = candidates?.length;
         return {
-            total: candidates.length,
-            avgScore: candidates.length > 0
-                ? Math.round(candidates.reduce((sum, c) => sum + c.overallScore, 0) / candidates.length)
+            total: numberOfcandidates,
+            avgScore: numberOfcandidates > 0
+                ? Math.round(candidates.reduce((sum, c) => sum + c.overallScore, 0) / numberOfcandidates)
                 : 0,
-            highScorers: candidates.filter(c => c.overallScore >= 75).length
+            highScorers: candidates.filter(c => c.overallScore >= 75)?.length || 0
         };
     };
 
@@ -163,10 +177,10 @@ export default function HRDashboard() {
         return (
             <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
                 <div className="max-w-md w-full">
-                    <div className="rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
                         {/* Header */}
                         <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-2xl mb-4">
+                            <div className="inline-flex items-center justify-center w-20 h-2 bg-opacity-20 rounded-2xl mb-4">
                                 <Users className="w-10 h-10 text-white" />
                             </div>
                             <h1 className="text-3xl font-bold text-white mb-2">HR Dashboard</h1>
@@ -297,7 +311,7 @@ export default function HRDashboard() {
                             ))}
                         </select>
                         <span className="text-sm text-gray-500 sm:ml-auto">
-                            Showing {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+                            Showing {candidates?.length || 0} candidate{candidates?.length !== 1 ? 's' : ''}
                         </span>
                     </div>
                 </div>
@@ -320,8 +334,8 @@ export default function HRDashboard() {
                                 <div
                                     key={stage.id}
                                     className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${isDragOver
-                                            ? 'border-indigo-400 bg-indigo-50 scale-105'
-                                            : 'border-gray-100'
+                                        ? 'border-indigo-400 bg-indigo-50 scale-105'
+                                        : 'border-gray-100'
                                         }`}
                                     onDragOver={(e) => handleDragOver(e, stage.id)}
                                     onDragLeave={handleDragLeave}
@@ -335,14 +349,14 @@ export default function HRDashboard() {
                                                 <h2 className="font-bold text-gray-900">{stage.title}</h2>
                                             </div>
                                             <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
-                                                {stageCandidates.length}
+                                                {stageCandidates?.length}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Candidate Cards */}
                                     <div className="p-4 space-y-3 min-h-[400px]">
-                                        {stageCandidates.map(candidate => (
+                                        {stageCandidates?.map(candidate => (
                                             <div
                                                 key={candidate.id}
                                                 draggable
@@ -380,7 +394,7 @@ export default function HRDashboard() {
                                             </div>
                                         ))}
 
-                                        {stageCandidates.length === 0 && (
+                                        {stageCandidates?.length === 0 && (
                                             <div className="flex flex-col items-center justify-center py-16 text-center">
                                                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                     <Users className="w-10 h-10 text-gray-300" />
