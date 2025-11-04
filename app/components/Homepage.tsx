@@ -121,7 +121,7 @@ export default function Homepage() {
             <div className="max-w-4xl mx-auto px-6 py-12">
                 {/* Header */}
                 <div className="mb-12">
-                    <div className="flex justify-end mb-4">
+                    <div className="flex justify-end mb-4"> 
                         <a
                             href="/hr-dashboard"
                             className="px-4 py-2 md:px-6 md:py-2.5 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm md:text-base"
