@@ -120,16 +120,28 @@ export default function Homepage() {
         <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
-                        <Briefcase className="w-8 h-8 text-white" />
+                <div className="mb-12">
+                    <div className="flex justify-end mb-4">
+                        <a
+                            href="/hr-dashboard"
+                            className="px-4 py-2 md:px-6 md:py-2.5 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm md:text-base"
+                        >
+                            <Briefcase className="w-4 h-4" />
+                            <span className="hidden sm:inline">HR Dashboard</span>
+                            <span className="sm:hidden">Dashboard</span>
+                        </a>
                     </div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text">
-                        Join Our Team
-                    </h1>
-                    <p className="text-lg text-gray-600">
-                        Start your journey with us by submitting your application
-                    </p>
+                    <div className="text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
+                            <Briefcase className="w-8 h-8 text-white" />
+                        </div>
+                        <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text">
+                            Join Our Team
+                        </h1>
+                        <p className="text-lg text-gray-600">
+                            Start your journey with us by submitting your application
+                        </p>
+                    </div>
                 </div>
 
                 {/* Main Card */}
