@@ -201,7 +201,7 @@ export default function HRDashboard() {
                                         setAuthError('');
                                     }}
                                     placeholder="Enter your password"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 border-2 text-gray-400 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                     autoFocus
                                 />
                             </div>
@@ -302,7 +302,7 @@ export default function HRDashboard() {
                         <select
                             value={selectedRole}
                             onChange={(e) => setSelectedRole(e.target.value)}
-                            className="flex-1 sm:flex-initial sm:min-w-[200px] px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            className="flex-1 sm:flex-initial sm:min-w-[200px] px-4 py-2 border-2 text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         >
                             {roleOptions.map(option => (
                                 <option key={option.value} value={option.value}>
@@ -412,7 +412,7 @@ export default function HRDashboard() {
 
                 {/* Candidate Detail Modal */}
                 {selectedCandidate && (
-                    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+                    <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
                         <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
                             {/* Modal Header */}
                             <div className="sticky top-0 bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-6 flex items-center justify-between">
@@ -427,7 +427,7 @@ export default function HRDashboard() {
                                 </div>
                                 <button
                                     onClick={() => setSelectedCandidate(null)}
-                                    className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all"
+                                    className="w-10 h-10 bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all"
                                 >
                                     <X className="w-6 h-6 text-white" />
                                 </button>
