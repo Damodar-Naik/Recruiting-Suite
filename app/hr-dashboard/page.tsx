@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Briefcase, TrendingUp, Award, Mail, Phone, Calendar, Star, X, ChevronRight, Filter } from 'lucide-react';
-
+import axios from 'axios';
 interface Candidate {
     id: number;
     firstName: string;
@@ -36,7 +36,7 @@ const roleOptions = [
 ];
 
 export default function HRDashboard() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState('');
     const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -51,6 +51,10 @@ export default function HRDashboard() {
             fetchCandidates();
         }
     }, [selectedRole, isAuthenticated]);
+
+    useEffect(() => {
+        localStorage.getItem('hrAuthToken') ? setIsAuthenticated(true) : setIsAuthenticated(false)
+    }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -80,14 +84,20 @@ export default function HRDashboard() {
     const fetchCandidates = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hr/candidates?role=${selectedRole}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' , authorization: `Bearer ${localStorage.getItem('hrAuthToken')}` },
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hr/candidates?role=${selectedRole}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${localStorage.getItem('hrAuthToken')}`
+                },
             });
-            const data = await response.json();
-            setCandidates(data.candidates);
-        } catch (error) {
-            console.error('Error fetching candidates:', error);
+            setCandidates(response?.data?.candidates || []);
+        } catch (error: any) {
+            console.log('Error fetching candidates:', error);
+            if (error.response?.data?.code == 'INVALID_USER') {
+                setIsAuthenticated(false);
+                localStorage.removeItem('hrAuthToken');
+                return;
+            }
         } finally {
             setLoading(false);
         }
@@ -172,8 +182,19 @@ export default function HRDashboard() {
 
     const stats = getStats();
 
+    if (isAuthenticated === null) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-500">Loading User...</p>
+                </div>
+            </div>
+        )
+    }
+
     // Login Screen
-    if (!isAuthenticated) {
+    if (!isAuthenticated && isAuthenticated !== null) {
         return (
             <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
                 <div className="max-w-md w-full">
