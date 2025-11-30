@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Briefcase, TrendingUp, Award, Mail, Phone, Calendar, Star, X, ChevronRight, Filter } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, Award, Mail, Phone, Calendar, Star, X, ChevronRight, Filter, LogOut } from 'lucide-react';
 import axios from 'axios';
 interface Candidate {
     id: number;
@@ -180,6 +180,12 @@ export default function HRDashboard() {
         };
     };
 
+    const logout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('hrAuthToken');
+        return;
+    }
+
     const stats = getStats();
 
     if (isAuthenticated === null) {
@@ -261,13 +267,24 @@ export default function HRDashboard() {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <Users className="w-6 h-6 text-white" />
+                    <div className='flex justify-between'>
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">HR Dashboard</h1>
+                                <p className="text-gray-600">Manage and track candidate applications</p>
+                            </div>
+
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">HR Dashboard</h1>
-                            <p className="text-gray-600">Manage and track candidate applications</p>
+                        <div onClick={() => logout()}>
+                            <div
+                                className="p-2 md:px-6 md:py-2.5 bg-white border-2 border-indigo-600 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-600 hover:text-white transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm md:text-base"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                <span >Logout</span>
+                            </div>
                         </div>
                     </div>
 
